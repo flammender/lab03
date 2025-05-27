@@ -1,36 +1,24 @@
-cmake_minimum_required(VERSION 3.10)
+# ваш_главный_каталог/CMakeLists.txt
 
+cmake_minimum_required(VERSION 3.10)
+project(YourMegaProject CXX) # Замените "YourMegaProject" на имя вашего проекта
+
+# Устанавливаем требуемый стандарт C++ для всего проекта
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(BUILD_EXAMPLES "Build examples" OFF)
+# Добавляем подкаталоги. CMake автоматически найдет в них CMakeLists.txt и запустит их.
+add_subdirectory(formatter_lib)
+add_subdirectory(formatter_ex_lib)
+add_subdirectory(solver_lib)
+add_subdirectory(hello_world_application)
 
-project(print)
+# Указываем, что исполняемый файл "hello_world" зависит от библиотек.
+# Это гарантирует правильный порядок сборки.
+add_dependencies(hello_world formatter_ex solver) # hello_world зависит от formatter_ex и solver
 
-add_library(print STATIC ${CMAKE_CURRENT_SOURCE_DIR}/sources/print.cpp)
-
-target_include_directories(print PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-
-if(BUILD_EXAMPLES)
-  file(GLOB EXAMPLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.cpp")
-  foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
-    get_filename_component(EXAMPLE_NAME ${EXAMPLE_SOURCE} NAME_WE)
-    add_executable(${EXAMPLE_NAME} ${EXAMPLE_SOURCE})
-    target_link_libraries(${EXAMPLE_NAME} print)
-    install(TARGETS ${EXAMPLE_NAME}
-      RUNTIME DESTINATION bin
-    )
-  endforeach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
-endif()
-
-install(TARGETS print
-    EXPORT print-config
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-)
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
-install(EXPORT print-config DESTINATION cmake)
+# Опционально: Устанавливаем целевые каталоги для исполняемых файлов и библиотек.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
